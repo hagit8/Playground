@@ -1,27 +1,4 @@
-terraform {
-  required_providers {
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 3.0.1"
-    }
-  }
-}
-
-provider "docker" {}
-
-# Pulls the image
-resource "docker_image" "nginx" {
-  name         = "nginx:latest"
-  keep_locally = false
-}
-
-# Creates a container
-resource "docker_container" "nginx" {
-  image = docker_image.nginx.image_id
-  name  = "tutorial-container"
-  
-  ports {
-    internal = 80
-    external = 8000
-  }
+resource "local_file" "demo_log" {
+  content  = "Infrastructure initialized"
+  filename = "${path.module}/init.log"
 }
