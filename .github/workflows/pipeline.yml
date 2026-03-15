@@ -12,6 +12,20 @@ jobs:
         run: echo "Running linter... Done!"
       - name: Run Unit Tests Stub
         run: echo "Running tests... All 12 tests passed!"
+        
+  security-scan:
+    name: Snyk Security Scan
+    needs: quality-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Snyk to check Dockerfile for issues
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor # This sends the results to your Snyk dashboard
+          file: Dockerfile
 
   build-image:
     name: Build Docker Image
