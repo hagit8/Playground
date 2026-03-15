@@ -13,34 +13,22 @@ jobs:
       - name: Run Unit Tests Stub
         run: echo "Running tests... All 12 tests passed!"
         
-  security-scan:
-    name: Snyk Security Scan
+  build-and-scan:
+    name: Build and Security Scan
     needs: quality-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Run Snyk to check Dockerfile for issues
+
+      # 1. Build the image first so it exists locally on the runner
+      - name: Build Docker Image
+        run: docker build -t demo-app:${{ github.sha }} .
+
+      # 2. Now tell Snyk to scan the image you just built
+      - name: Run Snyk to check Docker image for vulnerabilities
         uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: monitor # This sends the results to your Snyk dashboard
-          file: Dockerfile
-
-  build-image:
-    name: Build Docker Image
-    needs: quality-check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker Image
-        run: |
-          docker build -t demo-app:${{ github.sha }} .
-          echo "Image built successfully!"
-
-      - name: Verify Image Exists
-        run: docker images | grep demo-app
+          image: demo-app:${{ github.sha }} # Tell Snyk exactly which image to scan
+          args: --file=Dockerfile
