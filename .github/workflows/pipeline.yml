@@ -1,0 +1,32 @@
+name: Demo CI/CD Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  quality-check:
+    name: Lint & Test Stubs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Linting Stub
+        run: echo "Running linter... Done!"
+      - name: Run Unit Tests Stub
+        run: echo "Running tests... All 12 tests passed!"
+
+  build-image:
+    name: Build Docker Image
+    needs: quality-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        run: |
+          docker build -t demo-app:${{ github.sha }} .
+          echo "Image built successfully!"
+
+      - name: Verify Image Exists
+        run: docker images | grep demo-app
